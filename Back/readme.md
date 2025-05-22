@@ -318,3 +318,25 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [QSA,L]
 ```
 
+## (tasks.json)
+```
+{
+    "version: "2.0.0",
+    "tasks" : [
+        {
+            "label": "Run PHP",
+            "type": "shell",
+            "command": "경로",
+            "args": [
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "inDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
+```
+
