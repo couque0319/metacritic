@@ -2,8 +2,8 @@
 
 ## 데이터베이스 스키마 (db/schema.sql)
 
-```sql
 -- games 테이블
+```
 CREATE TABLE games (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -13,8 +13,10 @@ CREATE TABLE games (
   release_date DATE,
   image_url TEXT
 );
+```
 
 -- game_reviews 테이블
+```
 CREATE TABLE game_reviews (
   id INT AUTO_INCREMENT PRIMARY KEY,
   game_id INT NOT NULL,
@@ -24,8 +26,10 @@ CREATE TABLE game_reviews (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
 );
+```
 
 -- posts 테이블
+```
 CREATE TABLE posts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -33,8 +37,10 @@ CREATE TABLE posts (
   author VARCHAR(100),
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+```
 
 -- post_comments 테이블
+```
 CREATE TABLE post_comments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   post_id INT NOT NULL,
@@ -43,8 +49,10 @@ CREATE TABLE post_comments (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
+```
 
 -- users 테이블 (회원가입용)
+```
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
