@@ -4,62 +4,49 @@
 
 -- games 테이블
 ```
-CREATE TABLE games (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  meta_score INT,
-  user_score FLOAT,
-  release_date DATE,
-  image_url TEXT
-);
+CREATE TABLE `games` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text,
+  `meta_score` int(11) DEFAULT NULL,
+  `user_score` float DEFAULT NULL,
+  `release_date` date DEFAULT NULL,
+  `image_url` text,
+  PRIMARY KEY (`id`),
+  KEY `title` (`title`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 ```
 
 -- game_reviews 테이블
 ```
-CREATE TABLE game_reviews (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  game_id INT NOT NULL,
-  nickname VARCHAR(100),
-  rating FLOAT,
-  content TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
-);
-```
+CREATE TABLE `game_reviews` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `game_id` int(11) NOT NULL,
+  `nickname` varchar(100) DEFAULT NULL,
+  `rating` float DEFAULT NULL,
+  `content` text,
+  `created_at` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `game_id` (`game_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- posts 테이블
-```
-CREATE TABLE posts (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  content TEXT,
-  author VARCHAR(100),
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
--- post_comments 테이블
-```
-CREATE TABLE post_comments (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  post_id INT NOT NULL,
-  nickname VARCHAR(100),
-  comment TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
-);
 ```
 
 -- users 테이블 (회원가입용)
 ```
-CREATE TABLE users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255),
-  signup_method VARCHAR(50) NOT NULL DEFAULT 'manual',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `signup_method` varchar(50) NOT NULL DEFAULT 'manual',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `role` enum('user','admin') NOT NULL DEFAULT 'user',
+  `nickname` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 ```
 
 ## 설정 파일 (config/db_connect.php)
