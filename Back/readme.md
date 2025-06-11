@@ -33,7 +33,7 @@ CREATE TABLE `game_reviews` (
 
 ```
 
--- users 테이블 (회원가입용)
+-- users 테이블 
 ```
 CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
