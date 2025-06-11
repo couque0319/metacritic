@@ -39,15 +39,12 @@ project-root/
 ## 설치 방법
 
 1. 리포지토리 클론
-```bash
-git clone https://github.com/yourusername/game-review-website.git
-cd game-review-website
+```cmd
+git clone https://github.com/couque0319/reactproject.git .
 ```
 
 2. 백엔드 설정
-- MySQL 데이터베이스 생성
-- `backend/db/schema.sql` 파일의 SQL 명령어로 테이블 생성
-- `backend/config/db_connect.php`에서 데이터베이스 연결 정보 설정
+- MySQL 데이터베이스 
 
 3. 프론트엔드 설정
 ```bash
@@ -60,9 +57,4 @@ npm start
 
 ## API 엔드포인트
 
-- `GET /api/get_games.php` - 모든 게임 목록 조회
-- `GET /api/get_game.php?id=<id>` - 특정 게임 정보 조회
-- `POST /api/add_review.php` - 리뷰 추가
-- `GET /api/get_reviews.php?game_id=<id>` - 특정 게임의 리뷰 조회
-- `POST /api/signup_manual.php` - 일반 회원가입
-- `POST /api/signup_email.php` - 이메일 인증 회원가입
+
