@@ -611,7 +611,7 @@ try {
 
 ## 🗄️ 데이터베이스 스키마 (`db/schema.sql`)
 
-### -- games 테이블
+### --- games 테이블
 ```sql
 CREATE TABLE `games` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -626,7 +626,7 @@ CREATE TABLE `games` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
 
-### -- game_reviews 테이블
+### --- game_reviews 테이블
 ```sql
 CREATE TABLE `game_reviews` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -640,7 +640,7 @@ CREATE TABLE `game_reviews` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
 
-### -- users 테이블 
+### --- users 테이블 
 ```sql
 CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -655,7 +655,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
 
-### -- tasks.json
+### -- -tasks.json
 ```
 {
     "version": "2.0.0",
