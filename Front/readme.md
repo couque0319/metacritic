@@ -1,168 +1,288 @@
-# 🎮 GameReview Hub - React Application
+# 📦 Frontend - reactproject
 
-This repository contains the source code for GameReview Hub, a React application for browsing and reviewing games.
+React 기반 게임 리뷰 프로젝트의 **프론트엔드**입니다.
 
-## 📋 Table of Contents
-- [Core Files](#-core-files)
-- [Components](#-components)
-- [Pages](#-pages)
+## 📁 디렉토리 구조
 
-## 🧩 Core Files
+```
+frontend/
+├── copy-to-xampp.js
+├── package.json
+├── package-lock.json
+├── .env
+├── .gitignore
+├── README.md
+├── build/
+│   ├── index.html
+│   ├── favicon.ico
+│   ├── manifest.json
+│   ├── robots.txt
+│   └── static/
+│       ├── css/
+│       └── js/
+├── node_modules/
+```
 
-### App.js
+## 📌 주요 설명
+
+- **`package.json`** : 프로젝트 의존성과 실행 스크립트 정의
+- **`build/`** : `npm run build`로 생성된 정적 리소스
+- **`.env`** : 환경 변수 정의 파일
+- **`copy-to-xampp.js`** : 빌드 결과물을 XAMPP로 복사하는 유틸
+
+## 🧩 JSX 파일 코드
+
+### `src/components/AIBar/AIBar.jsx`
 ```jsx
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import './AIBar.css';
 
-import Home from './pages/Home/Home';
-import GameList from './pages/GameList/GameList';
-import GameDetail from './pages/GameDetail/GameDetail';
-import Login from './pages/Login/Login';
-import Signup from './pages/Signup/Signup';
+function AIBar() {
+  const [input, setInput] = useState('');
+  const [response, setResponse] = useState('');
+  const [loading, setLoading] = useState(false);
 
-import Header from './components/Header/Header';
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
 
-const App = () => {
+    setLoading(true);
+    setResponse('');
+
+    try {
+      const res = await fetch('http://localhost/reactproject/api/ask_ai.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: input })
+      });
+
+      const data = await res.json();
+      console.log("Gemini 응답:", data);
+
+      if (data.response) {
+        setResponse(data.response);
+      } else if (data.error) {
+        setResponse('❗ Gemini 오류: ' + data.error);
+      } else {
+        setResponse('AI 응답 오류');
+      }
+    } catch (err) {
+      setResponse('요청 실패: ' + err.message);
+    }
+
+    setLoading(false);
+    setInput('');
+  };
+
   return (
-    <>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/games" element={<GameList />} />
-        <Route path="/games/:id" element={<GameDetail />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="*" element={<div>페이지를 찾을 수 없습니다.</div>} />
-      </Routes>
-    </>
-  );
-};
+    <div className={`ai-container ${response ? 'expanded' : ''}`}>
+      <form className="ai-bar" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="AI에게 물어보세요..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? '...' : '▶'}
+        </button>
+      </form>
 
-export default App;
-```
-
-### index.js
-```jsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { BrowserRouter } from 'react-router-dom';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <BrowserRouter basename='/reactproject'>		
-    <App />
-  </BrowserRouter>
-);
-```
-
-### App.css
-```css
-body {
-  margin: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background-color: #1b1b1b;
-  color: #eee;
-}
-
-a {
-  color: #4fc3f7;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.card {
-  background-color: #2a2a2a;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
-
-.score-badge {
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: white;
-  font-weight: bold;
-}
-
-.score-high {
-  background-color: #66bb6a;
-}
-
-.score-medium {
-  background-color: #fdd835;
-}
-
-.score-low {
-  background-color: #ef5350;
-}
-```
-
-## 🎨 Components
-
-### Header Component
-
-#### Header.jsx
-```jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import './Header.css';
-
-function Header() {
-  return (
-    <header className="site-header">
-      <div className="logo">🎮 GameReview Hub</div>
-      <nav className="nav-links">
-        <Link to="/">Home</Link>
-        <Link to="/games">Games</Link>
-        <button className="register-button">Register</button>
-      </nav>
-    </header>
+      {response && (
+        <div className="ai-response">
+          <strong>AI 응답:</strong>
+          <p>{response}</p>
+        </div>
+      )}
+    </div>
   );
 }
 
-export default Header;
+export default AIBar;
+
 ```
 
-#### Header.css
-```css
-.site-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 20px;
-  background-color: #000;
-  color: white;
-}
-.logo { font-size: 1.5rem; font-weight: bold; }
-.nav-links { display: flex; align-items: center; gap: 1rem; }
-.nav-links a { color: #ffc107; text-decoration: none; font-weight: 500; }
-.register-button {
-  background-color: #ffc107;
-  color: black;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.register-button:hover { background-color: #e0a800; }
-```
-
-### GameCard Component
-
-#### GameCard.jsx
+### `src/components/Auth/AuthModal.jsx`
 ```jsx
+// src/components/Auth/AuthModal.jsx
+import React, { useState } from 'react';
+import LoginForm from './LoginForm';
+import SignupForm from './SignupForm';
+import './AuthModal.css';
+
+function AuthModal({ onClose }) {
+  const [mode, setMode] = useState('login');
+
+  return (
+    <div className="auth-modal-overlay">
+      <div className="auth-modal">
+        <button className="close-button" onClick={onClose}>×</button>
+        {mode === 'login' ? (
+          <>
+            <h2>로그인</h2>
+            <LoginForm onClose={onClose} />
+            <p onClick={() => setMode('signup')}>계정이 없으신가요? <strong>회원가입</strong></p>
+          </>
+        ) : (
+          <>
+            <h2>회원가입</h2>
+            <SignupForm onClose={onClose} />
+            <p onClick={() => setMode('login')}>이미 계정이 있으신가요? <strong>로그인</strong></p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default AuthModal;
+
+```
+
+### `src/components/Auth/LoginForm.jsx`
+```jsx
+import React, { useState } from 'react';
+
+function LoginForm({ onClose }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!username || !password) {
+      alert('아이디와 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/reactproject/api/login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+       alert('로그인 성공');
+        onClose();
+        setTimeout(() => {
+        window.location.reload();
+    }, 100); // 짧은 지연으로 모달 정상 닫힘
+
+      } else {
+        alert(data.message || '로그인 실패');
+      }
+    } catch (err) {
+      alert('서버 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-form">
+      <input
+        type="text"
+        placeholder="아이디"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        className="auth-input"
+      />
+      <input
+        type="password"
+        placeholder="비밀번호"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="auth-input"
+      />
+      <button onClick={handleLogin} className="auth-button" disabled={loading}>
+        {loading ? '처리 중...' : '로그인'}
+      </button>
+    </div>
+  );
+}
+
+export default LoginForm;
+
+```
+
+### `src/components/Auth/SignupForm.jsx`
+```jsx
+// SignupForm.jsx
+import React, { useState } from 'react';
+
+function SignupForm({ onClose }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSignup = async () => {
+    if (!username || !password || !nickname) {
+      alert('모든 항목을 입력해주세요.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/reactproject/api/register.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, nickname })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert('✅ 회원가입 완료! 로그인해주세요.');
+        onClose();
+      } else {
+        alert(data.message || '❌ 회원가입 실패');
+      }
+    } catch (error) {
+      alert('서버 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-form">
+      <input
+        type="text"
+        placeholder="아이디"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        className="auth-input"
+      />
+      <input
+        type="text"
+        placeholder="닉네임"
+        value={nickname}
+        onChange={(e) => setNickname(e.target.value)}
+        className="auth-input"
+      />
+      <input
+        type="password"
+        placeholder="비밀번호"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="auth-input"
+      />
+      <button onClick={handleSignup} className="auth-button" disabled={loading}>
+        {loading ? '처리 중...' : '회원가입'}
+      </button>
+    </div>
+  );
+}
+
+export default SignupForm;
+
+```
+
+### `src/components/GameCard/GameCard.jsx`
+```jsx
+// GameCard.jsx
 import React from 'react';
 import './GameCard.css';
 import { Link } from 'react-router-dom';
@@ -174,128 +294,256 @@ function getScoreClass(score) {
 }
 
 function GameCard({ game }) {
+  // 안전하게 데이터 fallback 설정
+  const title = typeof game.title === 'string' ? game.title : '제목 없음';
+  const description = typeof game.description === 'string' ? game.description.slice(0, 100) + '...' : '설명이 없습니다.';
+  const metaScore = typeof game.meta_score === 'number' ? game.meta_score : 'N/A';
+  const userScore = typeof game.user_score === 'number' ? game.user_score : 'N/A';
+
   return (
     <div className="game-card">
-      <Link to={`/games/${game.id}`}>
-        <img src={game.image_url} alt={game.title} className="game-image" />
-        <h3 className="game-title">{game.title}</h3>
+      <Link to={`/games/${game.id}`} className="game-link">
+        {game.image_url ? (
+          <img
+            src={game.image_url}
+            alt={title}
+            className="game-image"
+            onError={(e) => (e.target.style.display = 'none')}
+          />
+        ) : (
+          <div style={{ height: '200px', background: '#444' }}>이미지 없음</div>
+        )}
+        <h3 className="game-title">{title}</h3>
       </Link>
-      <p className="description">
-        {game.description ? game.description.slice(0, 100) + '...' : ''}
-      </p>
+
+      <p className="description">{description}</p>
       <p className="meta-score" data-score={getScoreClass(game.meta_score)}>
-        메타 점수: {game.meta_score}
+        메타 점수: {metaScore}
       </p>
-      <p className="user-score">유저 점수: {game.user_score}</p>
+      <p className="user-score">
+        유저 점수: {userScore}
+      </p>
     </div>
   );
 }
 
 export default GameCard;
+
 ```
 
-#### GameCard.css
-```css
-.game-card {
-  background-color: #2a2a2a;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  color: #f1f1f1;
-}
-.game-link { text-decoration: none; color: inherit; }
-.game-image { width: 100%; height: auto; border-radius: 6px; }
-.game-title {
-  font-size: 1.1rem;
-  margin: 0.7rem 0 0.5rem;
-  color: #ffffff;
-  font-weight: bold;
-  border-bottom: 1px solid #555;
-  padding-bottom: 0.3rem;
-}
-.description {
-  font-size: 0.95rem;
-  color: #f5f5f5;
-  margin-bottom: 0.7rem;
-}
-.meta-score {
-  background-color: #4caf50;
-  color: white;
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 5px;
-  font-weight: bold;
-  font-size: 0.9rem;
-}
-.user-score {
-  font-size: 0.9rem;
-  margin-top: 0.4rem;
-  color: #ffffff;
-}
-```
-
-### ReviewForm Component
-
-#### ReviewForm.jsx
+### `src/components/Header/Header.jsx`
 ```jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import './Header.css';
 
-function ReviewForm({ gameId }) {
-  const [nickname, setNickname] = useState('');
-  const [rating, setRating] = useState('');
-  const [content, setContent] = useState('');
+function Header({ onLoginClick }) {
+  const [user, setUser] = useState(null);
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    fetch('http://localhost/server/api/add_review.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game_id: gameId, nickname, rating, content })
+  useEffect(() => {
+    fetch('/reactproject/api/session_status.php', {
+      credentials: 'include'
     })
-      .then(response => response.text())
-      .then(() => {
-        setNickname('');
-        setRating('');
-        setContent('');
-      });
+      .then(res => res.json())
+      .then(data => {
+      console.log("session_status 응답:", data);
+      if (data.loggedIn) {
+       // user 관련 정보만 따로 저장
+       setUser({ username: data.username, role: data.role });
+     }
+    });
+  }, []);
+
+  const handleLogout = () => {
+    fetch('/reactproject/api/logout.php', {
+      credentials: 'include'
+    }).then(() => {
+      setUser(null);
+      window.location.reload();
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" placeholder="닉네임" value={nickname} onChange={e => setNickname(e.target.value)} required />
-      <input type="number" placeholder="평점" value={rating} onChange={e => setRating(e.target.value)} required min="0" max="10" />
-      <textarea placeholder="리뷰를 작성하세요" value={content} onChange={e => setContent(e.target.value)} required></textarea>
+    <header className="header">
+      <div className="header-inner">
+        <div className="logo">
+          <Link to="/">
+            <span role="img" aria-label="controller">🎮</span> <strong>GameReview Hub</strong>
+          </Link>
+        </div>
+
+        <nav className="nav-menu">
+          <Link to="/">Home</Link>
+          <Link to="/games">Games</Link>
+          {user?.role === 'admin' && <Link to="/admin">Admin</Link>}
+
+          {user ? (
+            <>
+              <span className="username">👤 {user.nickname}</span>
+              <Link to="/profile">
+                <button className="header-button">Profile</button>
+              </Link>
+              <button className="header-button" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <button className="header-button" onClick={onLoginClick}>Register</button>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+export default Header;
+
+```
+
+### `src/components/Review/ReviewForm.jsx`
+```jsx
+// ReviewForm.jsx
+import React, { useEffect, useState } from 'react';
+import './ReviewForm.css';
+
+function ReviewForm({ gameId, onReviewAdded }) {
+  const [nickname, setNickname] = useState('');
+  const [rating, setRating] = useState('');
+  const [content, setContent] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetch('/reactproject/api/session_status.php', {
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        setIsLoggedIn(data.loggedIn);
+        if (data.loggedIn) {
+          setNickname(data.nickname);  // ✅ 정확히 nickname 사용
+        }
+      });
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!isLoggedIn) {
+      alert("로그인 후 이용이 가능합니다.");
+      window.dispatchEvent(new Event('open-auth-modal'));
+      return;
+    }
+
+    const res = await fetch('/reactproject/api/add_review.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ game_id: gameId, nickname, rating, content })
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      setRating('');
+      setContent('');
+      onReviewAdded();  // 리뷰 목록 갱신
+    } else {
+      alert('리뷰 등록에 실패했습니다.');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="review-form">
+      <input type="text" placeholder="닉네임" value={nickname} disabled />
+      <input
+        type="number"
+        placeholder="평점 (0~10)"
+        value={rating}
+        onChange={(e) => setRating(e.target.value)}
+        required
+        min="0"
+        max="10"
+      />
+      <textarea
+        placeholder="리뷰를 작성하세요"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        required
+      />
       <button type="submit">리뷰 등록</button>
     </form>
   );
 }
 
 export default ReviewForm;
+
 ```
 
-### ReviewList Component
-
-#### ReviewList.jsx
+### `src/components/Review/ReviewList.jsx`
 ```jsx
+// ReviewList.jsx
 import React, { useEffect, useState } from 'react';
+import './ReviewList.css';
 
 function ReviewList({ gameId }) {
   const [reviews, setReviews] = useState([]);
+  const [currentUser, setCurrentUser] = useState('');
 
   useEffect(() => {
-    fetch(`http://localhost/server/api/get_reviews.php?game_id=${gameId}`)
-      .then(response => response.json())
-      .then(data => setReviews(data));
+    fetch(`/reactproject/api/get_reviews.php?game_id=${gameId}`)
+      .then(res => res.json())
+      .then(setReviews);
+
+    fetch('/reactproject/api/session_status.php', {
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.loggedIn) {
+          setCurrentUser(data.nickname);
+        }
+      });
   }, [gameId]);
 
+  const handleDelete = (id) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+
+    fetch('/reactproject/api/delete_review.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ id })
+    })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          setReviews(reviews.filter(r => r.id !== id));
+        } else {
+          alert('삭제에 실패했습니다.');
+        }
+      });
+  };
+
+  if (reviews.length === 0) {
+    return <p className="no-review">작성된 리뷰가 없습니다.</p>;
+  }
+
   return (
-    <div>
-      <h3>리뷰 목록</h3>
+    <div className="review-list">
       {reviews.map(review => (
-        <div key={review.id}>
-          <p><strong>{review.nickname}</strong> - 평점: {review.rating}</p>
-          <p>{review.content}</p>
+        <div key={review.id} className="review-card">
+          <div className={`review-score score-${Math.floor(review.rating)}`}>
+            {review.rating}
+          </div>
+          <div className="review-info">
+            <div className="review-meta">
+              <strong>{review.nickname}</strong>
+              <small>{review.created_at}</small>
+            </div>
+            <p className="review-content">{review.content}</p>
+            {currentUser === review.nickname && (
+              <div className="review-actions">
+                <button onClick={() => handleDelete(review.id)}>삭제</button>
+              </div>
+            )}
+          </div>
         </div>
       ))}
     </div>
@@ -303,60 +551,279 @@ function ReviewList({ gameId }) {
 }
 
 export default ReviewList;
+
 ```
 
-## 📄 Pages
-
-### Home Page
-
-#### Home.jsx
+### `src/pages/Admin/Admin.jsx`
 ```jsx
+// src/pages/Admin.jsx
 import React, { useEffect, useState } from 'react';
-import GameCard from '../../components/GameCard/GameCard';
-import './Home.css';
 
-function Home() {
-  const [games, setGames] = useState([]);
+function Admin() {
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    fetch('/server/api/get_games.php')
+    fetch('http://localhost/reactproject/api/get_users.php')
       .then(res => res.json())
-      .then(data => setGames(data));
+      .then(data => setUsers(data));
   }, []);
 
+  const updateRole = (username, newRole) => {
+    fetch('http://localhost/reactproject/api/update_user_role.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, role: newRole })
+    })
+    .then(res => res.json())
+    .then(data => alert(data.message));
+  };
+
+  const deleteReview = (reviewId) => {
+    fetch('http://localhost/reactproject/api/delete_review.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reviewId })
+    })
+    .then(res => res.json())
+    .then(data => alert(data.message));
+  };
+
   return (
-    <main className="home">
-      <h2>최신 게임</h2>
-      <div className="game-list">
-        {games.map(game => (
-          <GameCard key={game.id} game={game} />
-        ))}
-      </div>
-    </main>
+    <div>
+      <h2>회원 관리</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>아이디</th>
+            <th>권한</th>
+            <th>권한 변경</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map(user => (
+            <tr key={user.username}>
+              <td>{user.username}</td>
+              <td>{user.role}</td>
+              <td>
+                <button onClick={() => updateRole(user.username, 'admin')}>Admin</button>
+                <button onClick={() => updateRole(user.username, 'user')}>User</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
-export default Home;
+export default Admin;
 ```
 
-#### Home.css
-```css
-.home {
-  padding: 2rem;
-}
-
-.game-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-```
-
-### Game List Page
-
-#### GameList.jsx
+### `src/pages/Admin/AdminPanel.jsx`
 ```jsx
 import React, { useEffect, useState } from 'react';
+import './AdminPanel.css';
+
+function AdminPanel() {
+  const [users, setUsers] = useState([]);
+  const [selectedNickname, setSelectedNickname] = useState(null);
+  const [userReviews, setUserReviews] = useState([]);
+
+  useEffect(() => {
+    fetch('/reactproject/api/get_users.php')
+      .then(res => res.json())
+      .then(setUsers);
+  }, []);
+
+  const changeRole = (userId, newRole) => {
+    fetch('/reactproject/api/update_user_role.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: userId, role: newRole })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('권한 변경 완료');
+          // ✅ 상태에서 해당 유저의 role만 업데이트
+          setUsers(prev =>
+            prev.map(u => (u.id === userId ? { ...u, role: newRole } : u))
+          );
+        } else {
+          alert('변경 실패');
+          console.log(data.message);
+        }
+      });
+  };
+
+  const handleUserClick = (nickname) => {
+    setSelectedNickname(nickname);
+    fetch(`/reactproject/api/get_reviews_by_user.php?nickname=${nickname}`)
+      .then(res => res.json())
+      .then(setUserReviews);
+  };
+
+  const deleteReview = (reviewId) => {
+    if (!window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) return;
+
+    fetch('/reactproject/api/delete_review.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: reviewId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('리뷰 삭제 완료');
+          setUserReviews(prev => prev.filter(r => r.id !== reviewId));
+        } else {
+          alert('리뷰 삭제 실패');
+        }
+      });
+  };
+
+  return (
+    <div className="admin-container">
+      <h2>👑 관리자 패널</h2>
+
+      <table className="user-table">
+        <thead>
+          <tr>
+            <th>아이디</th>
+            <th>닉네임</th>
+            <th>권한</th>
+            <th>권한 변경</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map(user => (
+            <tr key={user.id}>
+              <td>{user.username}</td>
+              <td>
+                <button
+                  className="nickname-button"
+                  onClick={() => handleUserClick(user.nickname)}
+                >
+                  {user.nickname}
+                </button>
+              </td>
+              <td>{user.role}</td> {/* ✅ 현재 권한 표시 */}
+              <td>
+                <button
+                  className="role-user"
+                  onClick={() => changeRole(user.id, 'user')}
+                >
+                  user
+                </button>
+                <button
+                  className="role-admin"
+                  onClick={() => changeRole(user.id, 'admin')}
+                >
+                  admin
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {selectedNickname && (
+        <>
+          <h3>📝 <span style={{ color: '#0ff' }}>{selectedNickname}</span> 님의 리뷰 목록</h3>
+          {userReviews.length === 0 ? (
+            <p>작성한 리뷰가 없습니다.</p>
+          ) : (
+            <div className="review-list">
+              {userReviews.map(review => (
+                <div className="review-card" key={review.id}>
+                  <div className="review-card-header">
+                    <div>
+                      <p><strong>게임:</strong> {review.game_title}</p>
+                      <p><strong>평점:</strong> {review.rating}</p>
+                    </div>
+                    <button
+                      className="review-delete-btn"
+                      onClick={() => deleteReview(review.id)}
+                    >
+                      리뷰 삭제
+                    </button>
+                  </div>
+                  <p className="review-card-content">{review.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+export default AdminPanel;
+
+```
+
+### `src/pages/GameDetail/GameDetail.jsx`
+```jsx
+// src/pages/GameDetail/GameDetail.jsx
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import ReviewList from '../../components/Review/ReviewList';
+import ReviewForm from '../../components/Review/ReviewForm';
+import './GameDetail.css';
+
+function GameDetail() {
+  const { id } = useParams();
+  const [game, setGame] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(`/reactproject/api/get_game.php?id=${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (data?.error) {
+          setError(data.error);
+        } else {
+          setGame(data);
+        }
+      })
+      .catch(err => {
+        console.error('게임 상세 정보 불러오기 실패:', err);
+        setError('서버 오류가 발생했습니다.');
+      });
+  }, [id]);
+
+  if (error) return <p className="game-detail-wrapper">⚠️ {error}</p>;
+  if (!game) return <p className="game-detail-wrapper">로딩 중...</p>;
+
+  return (
+    <div className="game-detail-wrapper">
+      <div className="game-detail">
+        <h2>{game.title}</h2>
+        <img src={game.image_url} alt={game.title} className="game-detail-image" />
+        <p className="description">{game.description}</p>
+        <p className="meta-score">메타 점수: {game.meta_score}</p>
+        <p className="user-score">유저 점수: {game.user_score}</p>
+
+        <h3>리뷰</h3>
+        <ReviewList gameId={id} />
+        <ReviewForm gameId={id} />
+      </div>
+    </div>
+  );
+}
+
+export default GameDetail;
+
+```
+
+### `src/pages/GameList/GameList.jsx`
+```jsx
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import './GameList.css';
 
 function GameList() {
@@ -364,9 +831,14 @@ function GameList() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    fetch('/server/api/get_games.php')
-      .then(res => res.json())
-      .then(data => setGames(data));
+    fetch('/reactproject/api/get_games.php')
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+    return res.json();
+  })
+  .then(data => setGames(data))
+  .catch(err => console.error("게임 데이터를 불러오는 중 오류 발생:", err));
+
   }, []);
 
   const filteredGames = games.filter(game =>
@@ -385,15 +857,17 @@ function GameList() {
       />
       <div className="game-horizontal-list">
         {filteredGames.map(game => (
-          <div className="horizontal-game-card" key={game.id}>
-            <img src={game.image_url} alt={game.title} className="horizontal-game-image" />
-            <div className="horizontal-game-info">
-              <h3 className="horizontal-game-title">{game.title}</h3>
-              <p className="horizontal-description">{game.description?.slice(0, 120)}...</p>
-              <p className="meta-score">메타 점수: {game.meta_score}</p>
-              <p className="user-score">유저 점수: {game.user_score}</p>
+          <Link to={`/games/${game.id}`} key={game.id} className="horizontal-game-card-link">
+            <div className="horizontal-game-card">
+              <img src={game.image_url} alt={game.title} className="horizontal-game-image" />
+              <div className="horizontal-game-info">
+                <h3 className="horizontal-game-title">{game.title}</h3>
+                <p className="horizontal-description">{game.description?.slice(0, 120)}...</p>
+                <p className="meta-score">메타 점수: {game.meta_score}</p>
+                <p className="user-score">유저 점수: {game.user_score}</p>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </main>
@@ -401,348 +875,114 @@ function GameList() {
 }
 
 export default GameList;
+
 ```
 
-#### GameList.css
-```css
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #1c1c1c;
-  color: #f0f0f0;
-}
-
-.site-title {
-  font-size: 4rem;
-  color: #ffffff;
-  margin-bottom: 0.3rem;
-  font-weight: 700;
-}
-
-.nav-links {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.nav-links a {
-  color: #f0f0f0;
-  margin-right: 0.8rem;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.nav-links a:hover {
-  color: #f5c518;
-}
-
-.game-list-wrapper {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 2rem;
-}
-
-.page-title {
-  font-size: 1.8rem;
-  color: #f5c518;
-  border-bottom: 1px solid #444;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: none;
-  margin-bottom: 1.5rem;
-  background-color: #2e2e2e;
-  color: #fff;
-}
-
-.search-input::placeholder {
-  color: #aaa;
-}
-
-.game-horizontal-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.horizontal-game-card {
-  display: flex;
-  gap: 1.2rem;
-  padding: 1rem;
-  border-radius: 10px;
-  background-color: #2b2b2b;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
-  align-items: center;
-}
-
-.horizontal-game-image {
-  width: 320px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.horizontal-game-info {
-  flex: 1;
-}
-
-.horizontal-game-title {
-  font-size: 1.6rem;
-  color: #ffffff;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-}
-
-.horizontal-description {
-  font-size: 1.05rem;
-  color: #f2f2f2;
-  margin-bottom: 0.6rem;
-  line-height: 1.6;
-}
-
-.meta-score {
-  font-size: 1rem;
-  font-weight: 600;
-  background-color: #66bb6a;
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  color: #000;
-  margin-right: 0.5rem;
-}
-
-.user-score {
-  font-size: 1rem;
-  color: #dddddd;
-}
-```
-
-### Game Detail Page
-
-#### GameDetail.jsx
+### `src/pages/Home/Home.jsx`
 ```jsx
+// src/pages/Home/Home.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import ReviewList from '../../components/ReviewList/ReviewList';
-import ReviewForm from '../../components/ReviewForm/ReviewForm';
-import './GameDetail.css';
+import GameCard from '../../components/GameCard/GameCard';
+import './Home.css';
 
-function GameDetail() {
-  const { id } = useParams();
-  const [game, setGame] = useState(null);
+function Home() {
+  const [games, setGames] = useState([]);
 
   useEffect(() => {
-    fetch(`/server/api/get_game.php?id=${id}`)
-      .then((res) => res.json())
-      .then(setGame);
-  }, [id]);
-
-  if (!game) return <p>로딩 중...</p>;
-
-  return (
-    <div className="game-detail">
-      <h2>{game.title}</h2>
-      <img src={game.image_url} alt={game.title} className="game-detail-image" />
-      <p className="description">{game.description}</p>
-      <p className="meta-score">메타 점수: {game.meta_score}</p>
-      <p className="user-score">유저 점수: {game.user_score}</p>
-
-      <h3>리뷰</h3>
-      <ReviewList gameId={id} />
-      <ReviewForm gameId={id} />
-    </div>
-  );
-}
-
-export default GameDetail;
-```
-
-#### GameDetail.css
-```css
-.game-detail {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-family: 'Helvetica Neue', sans-serif;
-}
-
-.game-detail h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.game-detail-image {
-  width: 100%;
-  max-height: 400px;
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-}
-
-.description {
-  font-size: 1rem;
-  color: #333;
-  margin-bottom: 1rem;
-  line-height: 1.6;
-}
-
-.meta-score,
-.user-score {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: #444;
-}
-
-h3 {
-  margin-top: 2rem;
-  font-size: 1.5rem;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 0.5rem;
-}
-```
-
-### Login Page
-
-#### Login.jsx
-```jsx
-import React, { useState } from 'react';
-
-function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
-    fetch('/server/api/login.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
+    fetch('/reactproject/api/get_games.php')
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          alert('로그인 성공');
-          localStorage.setItem('user', JSON.stringify(data.user));
-          window.location.href = '/';
-        } else {
-          alert(data.message);
-        }
-      });
-  };
+        console.log("게임 데이터 개수:", data.length);
+        console.log("샘플 게임 구조:", data[0]);
+        setGames(data);
+      })
+      .catch(err => console.error("게임 데이터를 불러오는 중 오류:", err));
+  }, []);
 
   return (
-    <div className="login-container">
-      <h2>로그인</h2>
-      <input
-        type="email"
-        placeholder="이메일"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="비밀번호"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin}>로그인</button>
-    </div>
-  );
-}
-
-export default Login;
-```
-
-### Signup Page
-
-#### Signup.jsx
-```jsx
-import React, { useState } from 'react';
-
-function Signup() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [mode, setMode] = useState('manual');
-
-  const handleManualSignup = () => {
-    fetch('/server/api/signup_manual.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert('가입 완료');
-        } else {
-          alert(data.message);
-        }
-      });
-  };
-
-  const handleEmailSignup = () => {
-    fetch('/reactproject/api/signup_email.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert('이메일 인증 완료');
-        } else {
-          alert(data.message);
-        }
-      });
-  };
-
-  return (
-    <div className="signup-container">
-      <h2>회원가입</h2>
-      <div>
-        <button onClick={() => setMode('manual')}>ID/비밀번호로 가입</button>
-        <button onClick={() => setMode('email')}>이메일로 가입</button>
+    <main className="home">
+      <h2>최신 게임</h2>
+      <div className="game-list">
+        {games.map(game => (
+          <GameCard key={game.id} game={game} />
+        ))}
       </div>
+    </main>
+  );
+}
 
-      {mode === 'manual' && (
-        <div>
-          <input
-            type="email"
-            placeholder="이메일"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="비밀번호"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-          />
-          <button onClick={handleManualSignup}>가입하기</button>
-        </div>
-      )}
+export default Home;
 
-      {mode === 'email' && (
-        <div>
-          <input
-            type="email"
-            placeholder="이메일"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
-          <button onClick={handleEmailSignup}>인증 메일 보내기</button>
-        </div>
-      )}
+```
+
+### `src/pages/Profile/Profile.jsx`
+```jsx
+// Profile.jsx
+import React, { useEffect, useState } from 'react';
+import './Profile.css';
+import { Link } from 'react-router-dom';
+
+function Profile() {
+  const [user, setUser] = useState(null);
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    fetch('/reactproject/api/session_status.php', {
+      credentials: 'include'
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.loggedIn) {
+          setUser(data);
+
+          // 사용자 리뷰 불러오기
+          fetch(`/reactproject/api/get_reviews_by_user.php?nickname=${data.nickname}`)
+            .then(res => res.json())
+            .then(setReviews);
+        }
+      });
+  }, []);
+
+  if (!user) return <p>로그인이 필요합니다.</p>;
+
+  return (
+    <div className="profile-wrapper">
+      <aside className="profile-sidebar">
+        <h2>My Profile</h2>
+        <nav>
+          <ul>
+            <li className="active">MY RATINGS & REVIEWS</li>
+            <li><Link to="#">MY ACCOUNT</Link></li>
+            <li><Link to="#" onClick={() => {
+              fetch('/reactproject/api/logout.php', {
+                credentials: 'include'
+              }).then(() => window.location.href = '/');
+            }}>SIGN OUT</Link></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main className="profile-main">
+        <h3>My Ratings & Reviews</h3>
+        {reviews.length === 0 ? (
+          <p className="no-review">You haven’t rated anything yet</p>
+        ) : (
+          <ul className="review-list">
+            {reviews.map(r => (
+              <li key={r.id}>
+                <Link to={`/games/${r.game_id}`}>
+                  <strong>{r.game_title}</strong> - ⭐ {r.rating}
+                </Link>
+                <p>{r.content}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </main>
     </div>
   );
 }
 
-export default Signup;
+export default Profile;
+
 ```
