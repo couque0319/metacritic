@@ -95,5 +95,4 @@ npm start
 ### api key (삭제 예정)
 
 
-rawg : 54c008e10ab14d85abb4b862469bf4a7
-gcp : AIzaSyCOdZQkwRaVXqgVVwJ4lF_XH_PeNd7Nw_Q
+
